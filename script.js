@@ -47,7 +47,7 @@
   });
 
   function updateActiveLink() {
-    const sections = ['home','about','services','blogs','contact'];
+    const sections = ['home','about','services','products','clients','blogs','contact'];
     let current = 'home';
     sections.forEach(id => {
       const el = document.getElementById(id);
@@ -201,7 +201,7 @@
   const cardIo = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
-        const children = e.target.querySelectorAll('.srv-card, .blog-card');
+        const children = e.target.querySelectorAll('.srv-card, .blog-card, .product-card, .client-card');
         children.forEach((c, i) => {
           setTimeout(() => {
             c.style.opacity = '1';
@@ -212,7 +212,7 @@
     });
   }, { threshold: 0.05 });
 
-  const grids = document.querySelectorAll('.services-grid, .blogs-grid, .blogs-featured');
+  const grids = document.querySelectorAll('.services-grid, .blogs-grid, .blogs-featured, .products-grid, .clients-grid');
   grids.forEach(g => cardIo.observe(g));
 })();
 
@@ -265,6 +265,8 @@
 
   stagger(document.querySelectorAll('.srv-card'));
   stagger(document.querySelectorAll('.blog-card'));
+  stagger(document.querySelectorAll('.product-card'));
+  stagger(document.querySelectorAll('.client-card'));
 })();
 
 /* ---- CONTACT FORM ---- */
@@ -308,3 +310,44 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
   });
 });
+
+
+/* ======================================
+   Contact Form -> WhatsApp
+====================================== */
+
+const contactForm = document.getElementById("contactForm");
+
+if(contactForm){
+
+contactForm.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const name=document.getElementById("name").value;
+const email=document.getElementById("email").value;
+const service=document.getElementById("service").value;
+const message=document.getElementById("message").value;
+
+const text=`Hello Dekode,
+
+I am interested in your services.
+
+*Name:* ${name}
+
+*Email:* ${email}
+
+*Service:* ${service}
+
+*Message:*
+${message}`;
+
+const url=`https://wa.me/919278154679?text=${encodeURIComponent(text)}`;
+
+window.open(url,"_blank");
+
+contactForm.reset();
+
+});
+
+}
