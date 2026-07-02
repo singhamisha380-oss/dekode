@@ -1,4 +1,6 @@
-
+/* ============================================
+   DEKODE — MAIN SCRIPT (UPDATED)
+   ============================================ */
 
 /* ---- NAVBAR ---- */
 (function () {
@@ -20,6 +22,7 @@
     mobileDrawer.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
+  
   function closeMenu() {
     hamburger.classList.remove('open');
     mobileOverlay.classList.remove('open');
@@ -27,19 +30,43 @@
     document.body.style.overflow = '';
   }
 
-  hamburger.addEventListener('click', () => {
-    if (mobileDrawer.classList.contains('open')) closeMenu(); else openMenu();
+  // Toggle menu on hamburger click
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (mobileDrawer.classList.contains('open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
   });
+
+  // Close menu on overlay click
   mobileOverlay.addEventListener('click', closeMenu);
+  
+  // Close menu on close button click
   closeBtn.addEventListener('click', closeMenu);
 
+  // Close menu on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+      closeMenu();
+    }
+  });
+
+  // Handle nav link clicks
   navLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
       const target = link.dataset.target;
       if (target) {
+        e.preventDefault();
         const el = document.getElementById(target);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-        closeMenu();
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          // Close mobile menu if open
+          if (mobileDrawer.classList.contains('open')) {
+            closeMenu();
+          }
+        }
       }
     });
   });
@@ -239,11 +266,14 @@
 /* ---- SERVICE + BLOG CARD STAGGER ---- */
 (function () {
   function stagger(cards) {
+    if (!cards || cards.length === 0) return;
+    
     cards.forEach((c, i) => {
       c.style.opacity = '0';
       c.style.transform = 'translateY(30px)';
       c.style.transition = `opacity 0.6s ease ${i * 0.08}s, transform 0.6s ease ${i * 0.08}s`;
     });
+    
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -258,7 +288,10 @@
       });
     }, { threshold: 0.05 });
 
-    if (cards[0] && cards[0].parentElement) io.observe(cards[0].closest('section') || cards[0].parentElement);
+    if (cards[0] && cards[0].parentElement) {
+      const parent = cards[0].closest('section') || cards[0].parentElement;
+      if (parent) io.observe(parent);
+    }
   }
 
   stagger(document.querySelectorAll('.srv-card'));
@@ -284,6 +317,7 @@
     spinner.style.display = 'block';
     btnText.textContent = 'Sending...';
     submitBtn.disabled = true;
+    
     setTimeout(() => {
       formWrap.style.display = 'none';
       successState.style.display = 'block';
@@ -293,11 +327,13 @@
     }, 1600);
   });
 
-  resetBtn.addEventListener('click', () => {
-    form.reset();
-    successState.style.display = 'none';
-    formWrap.style.display = 'block';
-  });
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      successState.style.display = 'none';
+      formWrap.style.display = 'block';
+    });
+  }
 })();
 
 /* ---- SMOOTH SCROLL for anchor links ---- */
@@ -305,47 +341,120 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const id = a.getAttribute('href').slice(1);
     const el = document.getElementById(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+    if (el) { 
+      e.preventDefault(); 
+      el.scrollIntoView({ behavior: 'smooth' }); 
+      
+      // Close mobile menu if open
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      if (mobileDrawer && mobileDrawer.classList.contains('open')) {
+        const hamburger = document.getElementById('hamburger');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        hamburger.classList.remove('open');
+        mobileOverlay.classList.remove('open');
+        mobileDrawer.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
   });
 });
 
-
 /* ======================================
-   Contact Form -> WhatsApp
+   Contact Form -> WhatsApp (UPDATED)
 ====================================== */
 
-const contactForm = document.getElementById("contactForm");
-
-if(contactForm){
-
-contactForm.addEventListener("submit",function(e){
-
-e.preventDefault();
-
-const name=document.getElementById("name").value;
-const email=document.getElementById("email").value;
-const service=document.getElementById("service").value;
-const message=document.getElementById("message").value;
-
-const text=`Hello Dekode,
+(function() {
+  const contactForm = document.getElementById("contactForm");
+  
+  if (contactForm) {
+    // Get WhatsApp number from data attribute or use default
+    const whatsappNumber = contactForm.dataset.whatsapp || '919278154679';
+    
+    contactForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Get form values
+      const name = document.getElementById("name")?.value || '';
+      const email = document.getElementById("email")?.value || '';
+      const service = document.getElementById("service")?.value || '';
+      const message = document.getElementById("message")?.value || '';
+      
+      // Format message
+      const text = `Hello Dekode,
 
 I am interested in your services.
 
 *Name:* ${name}
-
 *Email:* ${email}
-
 *Service:* ${service}
-
 *Message:*
 ${message}`;
+      
+      // Create WhatsApp URL
+      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+      
+      // Open in new window
+      window.open(url, "_blank");
+      
+      // Reset form
+      contactForm.reset();
+      
+      // Show success message briefly
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn?.textContent || 'Send Message';
+      if (submitBtn) {
+        submitBtn.textContent = '✓ Sent!';
+        submitBtn.style.background = '#22c55e';
+        setTimeout(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.style.background = '';
+        }, 3000);
+      }
+    });
+  }
+})();
 
-const url=`https://wa.me/919278154679?text=${encodeURIComponent(text)}`;
+/* ---- MOBILE MENU FIX - Ensure it works on all devices ---- */
+(function() {
+  // Additional fix for mobile menu on touch devices
+  document.addEventListener('touchstart', function(e) {
+    const hamburger = document.getElementById('hamburger');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    
+    // If click is outside drawer and drawer is open, close it
+    if (mobileDrawer && mobileDrawer.classList.contains('open')) {
+      const isClickInside = mobileDrawer.contains(e.target);
+      const isClickOnHamburger = hamburger && hamburger.contains(e.target);
+      
+      if (!isClickInside && !isClickOnHamburger) {
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        hamburger.classList.remove('open');
+        mobileOverlay.classList.remove('open');
+        mobileDrawer.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+  }, { passive: true });
+})();
 
-window.open(url,"_blank");
+/* ---- WHATSAPP BUTTON VISIBILITY FIX ---- */
+(function() {
+  // Ensure WhatsApp button is visible on all devices
+  const whatsappBtn = document.querySelector('.whatsapp-float');
+  if (whatsappBtn) {
+    // Check if button is visible
+    const style = window.getComputedStyle(whatsappBtn);
+    if (style.display === 'none' || style.visibility === 'hidden') {
+      whatsappBtn.style.display = 'flex';
+      whatsappBtn.style.visibility = 'visible';
+    }
+    
+    // Add click tracking if needed
+    whatsappBtn.addEventListener('click', function() {
+      console.log('WhatsApp button clicked');
+    });
+  }
+})();
 
-contactForm.reset();
-
-});
-
-}
+console.log('✅ DEKODE — All scripts initialized successfully');
+console.log('📱 Mobile menu and WhatsApp button fixes applied');
