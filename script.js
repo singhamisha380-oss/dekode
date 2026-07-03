@@ -1,6 +1,5 @@
-/* ============================================
-   DEKODE — MAIN SCRIPT (UPDATED)
-   ============================================ */
+
+document.addEventListener('touchstart', function() {}, false);
 
 /* ---- NAVBAR ---- */
 (function () {
@@ -48,6 +47,42 @@
 
   // Close menu on escape key
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+      closeMenu();
+    }
+  });
+
+  // Handle nav link clicks
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const target = link.dataset.target;
+      if (target) {
+        e.preventDefault();
+        const el = document.getElementById(target);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          // Close mobile menu if open
+          if (mobileDrawer.classList.contains('open')) {
+            closeMenu();
+          }
+        }
+      }
+    });
+  });
+
+  function updateActiveLink() {
+    const sections = ['home','about','services','products','clients','blogs','contact'];
+    let current = 'home';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 120) current = id;
+    });
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(l => {
+      l.classList.toggle('active', l.dataset.target === current);
+    });
+  }
+  updateActiveLink();
+})();
     if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
       closeMenu();
     }
